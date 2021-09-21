@@ -218,7 +218,7 @@ sub _put {
 	confess 'Error uploading ' . $http_response->as_string
 		unless $http_response->is_success;
 
-	return '';
+	return $http_response;
 }
 
 sub put_filename {
@@ -347,8 +347,6 @@ sub put_part {
 
 		upload_id   => $args{upload_id},
 		part_number => $args{part_number},
-		acl_short   => $args{acl_short},
-		copy_source => $args{copy_source},
 		headers     => $args{headers},
 		value       => $args{value},
 	);
@@ -390,19 +388,13 @@ sub query_string_authentication_uri_for_method {
 sub head {
 	my $self = shift;
 
-	my $http_request = Net::Amazon::S3::Operation::Object::Fetch::Request->new(
-		s3     => $self->client->s3,
-		bucket => $self->bucket->name,
-		key    => $self->key,
-
-		method => 'HEAD',
+	my $response = $self->_perform_operation (
+		'Net::Amazon::S3::Operation::Object::Head',
 	);
 
-	my $http_response = $self->client->_send_request ($http_request)->http_response;
-
+	my $http_response = $response->http_response;
 	confess 'Error head-object ' . $http_response->as_string
 		unless $http_response->is_success;
-
 	my %metadata;
 	my $headers = $http_response->headers;
 	foreach my $name ($headers->header_field_names) {
