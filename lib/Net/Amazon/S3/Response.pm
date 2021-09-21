@@ -88,7 +88,7 @@ sub content_length {
 }
 
 sub content_type {
-	return $_[0]->http_response->content_type;
+	return $_[0]->http_response->content_type || 'Content-Type: application/xml';
 }
 
 sub date {
