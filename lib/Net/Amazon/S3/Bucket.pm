@@ -393,7 +393,7 @@ sub _head_region {
 	my $protocol = $self->account->secure ? 'https' : 'http';
 	my $host = $self->account->host;
 	my $path = $self->bucket;
-	my @retry = (1, 2, (4) x 8);
+	my @retry = (1, 2, 4, 8, 16, (32) x 8);
 
 	if ($self->account->use_virtual_host) {
 		$host = "$path.$host";
