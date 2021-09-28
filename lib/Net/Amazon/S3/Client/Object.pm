@@ -150,6 +150,21 @@ sub get_filename {
 		my $md5_hex = file_md5_hex($filename);
 		confess 'Corrupted download' if $etag ne $md5_hex;
 	}
+	return $response->http_response;
+}
+
+sub get_filename_nomd5 {
+	my ( $self, $filename ) = @_;
+
+	my $response = $self->_perform_operation (
+		'Net::Amazon::S3::Operation::Object::Fetch',
+		filename       => $filename,
+		method => 'GET',
+	);
+
+	$self->_load_user_metadata($response->http_response);
+
+	return $response->http_response;
 }
 
 sub _load_user_metadata {
