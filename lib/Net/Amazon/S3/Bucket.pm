@@ -415,8 +415,8 @@ sub _head_region {
 		return $response->header (Net::Amazon::S3::Constants->HEADER_BUCKET_REGION)
 			if $response->header (Net::Amazon::S3::Constants->HEADER_BUCKET_REGION);
 
-		print STDERR "Invalid bucket head response; $request_uri\n";
-		print STDERR $response->as_string;
+		warn "Invalid bucket head response; $request_uri";
+		warn $response->as_string;
 
 		sleep shift @retry;
 	}
