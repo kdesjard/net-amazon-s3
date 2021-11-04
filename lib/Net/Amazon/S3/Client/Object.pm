@@ -180,6 +180,63 @@ sub _load_user_metadata {
 	%{ $self->user_metadata } = %user_metadata;
 }
 
+sub copy {
+	my ( $self, $key ) = @_;
+	$self->_copy( $key );
+}
+
+sub _copy {
+	my ( $self, $key ) = @_;
+
+	my $conf = {
+	#	'Content-MD5'    => $md5_base64,
+	#	'Content-Length' => $size,
+	#	'Content-Type'   => $self->content_type,
+	};
+
+	if ( $self->expires ) {
+		$conf->{Expires}
+			= DateTime::Format::HTTP->format_datetime( $self->expires );
+	}
+	if ( $self->content_encoding ) {
+		$conf->{'Content-Encoding'} = $self->content_encoding;
+	}
+	if ( $self->content_disposition ) {
+		$conf->{'Content-Disposition'} = $self->content_disposition;
+	}
+	if ( $self->cache_control ) {
+		$conf->{'Cache-Control'} = $self->cache_control;
+	}
+	if ( $self->storage_class && $self->storage_class ne 'standard' ) {
+		$conf->{'x-amz-storage-class'} = uc $self->storage_class;
+	}
+	if ( $self->website_redirect_location ) {
+		$conf->{'x-amz-website-redirect-location'} = $self->website_redirect_location;
+	}
+	$conf->{'x-amz-metadata-directive'} = 'REPLACE';
+	$conf->{'x-amz-copy-source'} = join '/','',$self->bucket->name,$self->key;
+
+	$conf->{"x-amz-meta-\L$_"} = $self->user_metadata->{$_}
+		for keys %{ $self->user_metadata };
+
+	my $response = $self->_perform_operation (
+		'Net::Amazon::S3::Operation::Object::Add',
+
+		value      => '',
+		key        => $key,
+		headers    => $conf,
+		acl        => $self->acl,
+		encryption => $self->encryption,
+	);
+
+	my $http_response = $response->http_response;
+
+	confess 'Error uploading ' . $http_response->as_string
+		unless $http_response->is_success;
+
+	return $http_response;
+}
+
 sub put {
 	my ( $self, $value ) = @_;
 	$self->_put( $value, length $value, md5_hex($value) );
