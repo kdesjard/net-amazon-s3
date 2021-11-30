@@ -23,6 +23,7 @@ use Net::Amazon::S3::Operation::Bucket::Delete;
 use Net::Amazon::S3::Operation::Bucket::Location;
 use Net::Amazon::S3::Operation::Bucket::Tags::Add;
 use Net::Amazon::S3::Operation::Bucket::Tags::Delete;
+use Net::Amazon::S3::Operation::Bucket::Head;
 use Net::Amazon::S3::Operation::Buckets::List;
 use Net::Amazon::S3::Operation::Object::Acl::Fetch;
 use Net::Amazon::S3::Operation::Object::Acl::Set;
