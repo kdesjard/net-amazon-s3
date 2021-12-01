@@ -415,7 +415,11 @@ sub _head_region {
 		return $response->header (Net::Amazon::S3::Constants->HEADER_BUCKET_REGION)
 			if $response->header (Net::Amazon::S3::Constants->HEADER_BUCKET_REGION);
 
-		last if($response->code == 404);
+		if($response->code == 404) {
+			die "Invalid bucket";
+		} elsif($response->code == 500) {
+			die "Connection Error";
+		}
 
 		warn "Invalid bucket head response; $request_uri";
 		warn $response->as_string;
