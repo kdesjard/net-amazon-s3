@@ -15,11 +15,11 @@ has '+host' => (
 has '+authorization_method' => (
 	default => sub { 'Net::Amazon::S3::Signature::V4' },
 );
+has 'region' => (is => 'rw', isa => 'Str', required => 0);
 
 sub guess_bucket_region {
 	my ($self, $bucket) = @_;
-
-	$bucket->_head_region;
+	return (defined $self->region) ? $self->region : $bucket->_head_region;
 }
 
 1;
