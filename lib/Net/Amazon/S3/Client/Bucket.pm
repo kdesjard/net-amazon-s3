@@ -129,7 +129,6 @@ sub list {
 				prefix    => $prefix,
 				delimiter => $delimiter,
 			);
-
 			return unless $response->is_success;
 
 			my @objects;
@@ -142,6 +141,16 @@ sub list {
 					size   => $node->{size},
 					last_modified_raw => $node->{last_modified},
 				);
+			}
+			if(defined $response->common_prefixes) {
+				foreach my $folder ($response->common_prefixes) {
+					push @objects, $self->object_class->new (
+						client => $self->client,
+						bucket => $self,
+						key    => $folder,
+						folder => 1,
+					);
+				}
 			}
 
 			return undef unless @objects;
