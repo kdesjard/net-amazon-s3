@@ -13,8 +13,11 @@ has key => (
 
 override _request_path => sub {
 	my ($self) = @_;
-
-	return super . (join '/', map {$self->s3->_urlencode($_)} split /\//, $self->key);
+	my $path = super . (join '/', map {$self->s3->_urlencode($_)} split /\//, $self->key);
+	if($self->key =~ /\/$/msx) {
+		$path .= '/';
+	}
+	return $path;
 };
 
 __PACKAGE__->meta->make_immutable;
