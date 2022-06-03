@@ -64,7 +64,7 @@ has 'storage_class' => (
 	default  => 'standard',
 );
 has 'user_metadata' => (
-	is       => 'ro',
+	is       => 'rw',
 	isa      => 'HashRef',
 	required => 0,
 	default  => sub { {} },
