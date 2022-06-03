@@ -49,7 +49,7 @@ use Net::Amazon::S3::Vendor::Amazon;
 use LWP::UserAgent::Determined;
 use URI::Escape qw(uri_escape_utf8);
 
-our $VERSION = '0.98';
+our $VERSION = '2.99';
 
 my $AMAZON_S3_HOST = 's3.amazonaws.com';
 
