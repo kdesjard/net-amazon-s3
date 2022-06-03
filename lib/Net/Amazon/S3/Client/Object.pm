@@ -16,6 +16,7 @@ use Ref::Util ();
 
 use Net::Amazon::S3::Constraint::ACL::Canned;
 use Net::Amazon::S3::Constraint::Etag;
+use Net::Amazon::S3::Client::Object::Range;
 
 with 'Net::Amazon::S3::Role::ACL';
 
@@ -82,6 +83,15 @@ has 'encryption' => (
 
 __PACKAGE__->meta->make_immutable;
 
+sub range {
+	my ($self, $range) = @_;
+
+	return Net::Amazon::S3::Client::Object::Range->new (
+		object  => $self,
+		range   => $range,
+	);
+}
+
 sub exists {
 	my $self = shift;
 
@@ -102,13 +112,6 @@ sub _get {
 	);
 
 	$self->_load_user_metadata ($response->http_response);
-
-	my $etag = $self->etag || $response->etag;
-	unless ($self->_is_multipart_etag ($etag)) {
-		my $content = $response->content;
-		my $md5_hex = md5_hex ($content);
-		confess 'Corrupted download' if $etag ne $md5_hex;
-	}
 
 	return $response;
 }
@@ -146,11 +149,6 @@ sub get_filename {
 
 	$self->_load_user_metadata($response->http_response);
 
-	my $etag = $self->etag || $response->etag;
-	unless ($self->_is_multipart_etag($etag)) {
-		my $md5_hex = file_md5_hex($filename);
-		confess 'Corrupted download' if $etag ne $md5_hex;
-	}
 	return $response->http_response;
 }
 
@@ -462,18 +460,20 @@ sub head {
 	my $self = shift;
 
 	my $response = $self->_perform_operation (
-		'Net::Amazon::S3::Operation::Object::Head',
+		'Net::Amazon::S3::Operation::Object::Fetch',
+
+		key    => $self->key,
+		method => 'HEAD',
 	);
 
+	return unless $response->is_success;
 	my $http_response = $response->http_response;
-	confess 'Error head-object ' . $http_response->as_string
-		unless $http_response->is_success;
+
 	my %metadata;
-	my $headers = $http_response->headers;
-	foreach my $name ($headers->header_field_names) {
-		if ($self->_is_metadata_header ($name)) {
-			my $metadata_name = $self->_format_metadata_name ($name);
-			$metadata{$metadata_name} = $http_response->header ($name);
+	for my $header_name ($http_response->header_field_names) {
+		if ($self->_is_metadata_header ($header_name)) {
+			my $metadata_name = $self->_format_metadata_name ($header_name);
+			$metadata{$metadata_name} = $http_response->header ($header_name);
 		}
 	}
 
@@ -701,6 +701,12 @@ This module represents objects in buckets.
 
 =head1 METHODS
 
+=head2 range
+
+	my $value = $object->range ('bytes=1024-10240')->get;
+
+Provides simple interface to ranged download. See also L<Net::Amazon::S3::Client::Object::Range>.
+
 =head2 etag
 
   # show the etag of an existing object (if fetched by listing
@@ -717,6 +723,8 @@ This module represents objects in buckets.
   # to see if an object exists
   if ($object->exists) { ... }
 
+Method doesn't report error when bucket or key doesn't exist.
+
 =head2 get
 
   # to get the vaue of an object
@@ -726,6 +734,8 @@ This module represents objects in buckets.
 
   # to get the metadata of an object
   my %metadata = %{$object->head};
+
+Unlike C<exists> this method does report error.
 
 =head2 get_decoded
 
