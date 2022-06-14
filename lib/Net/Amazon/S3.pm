@@ -81,6 +81,7 @@ has vendor => (
 has 'timeout' => ( is => 'ro', isa => 'Num',  required => 0, default => 30 );
 has 'retry'   => ( is => 'ro', isa => 'Bool', required => 0, default => 0 );
 has 'ua'     => ( is => 'rw', isa => 'LWP::UserAgent', required => 0 );
+has 'ua_read_size_hint' => ( is => 'ro', isa => 'Int', required => 0, default => 8192 );
 has 'err'    => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 has 'errstr' => ( is => 'rw', isa => 'Maybe[Str]',     required => 0 );
 has keep_alive_cache_size => ( is => 'ro', isa => 'Int', required => 0, default => 10 );
@@ -379,7 +380,7 @@ sub _perform_operation {
 	my $filename = delete $params{filename};
 
 	my $request  = $request_class->new (s3 => $self, %params);
-	my $http_response = $self->ua->request ($request->http_request, $filename);
+	my $http_response = $self->ua->request ($request->http_request, $filename, $self->ua_read_size_hint);
 	my $response    = $response_class->new (http_response => $http_response);
 
 	$error_handler->handle_error ($response);
