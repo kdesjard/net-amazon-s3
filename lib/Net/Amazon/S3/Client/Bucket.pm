@@ -216,10 +216,6 @@ sub head {
         'Net::Amazon::S3::Operation::Bucket::Head',
     );
  
-    my $http_response = $response->http_response;
-    confess 'Error head-object ' . $http_response->as_string
-        unless $http_response->is_success;
- 
 	return $response->is_success;
 }
 
