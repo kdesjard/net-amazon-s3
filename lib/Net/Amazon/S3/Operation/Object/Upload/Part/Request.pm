@@ -10,7 +10,7 @@ with 'Net::Amazon::S3::Request::Role::Query::Param::Part_number';
 with 'Net::Amazon::S3::Request::Role::HTTP::Header::Copy_source';
 with 'Net::Amazon::S3::Request::Role::HTTP::Method::PUT';
 
-has 'value'         => ( is => 'ro', isa => 'Str|CodeRef|ScalarRef',     required => 0 );
+has 'value'         => ( is => 'ro', isa => 'Str|CodeRef|ScalarRef|Undef',     required => 0 );
 has 'headers' =>
 	( is => 'ro', isa => 'HashRef', required => 0, default => sub { {} } );
 
