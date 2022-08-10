@@ -180,12 +180,12 @@ sub _load_user_metadata {
 }
 
 sub copy {
-	my ( $self, $key ) = @_;
-	$self->_copy( $key );
+	my ( $self, $key, $headers ) = @_;
+	$self->_copy( $key, $headers );
 }
 
 sub _copy {
-	my ( $self, $key ) = @_;
+	my ( $self, $key, $headers ) = @_;
 
 	my $conf = {
 	#	'Content-MD5'    => $md5_base64,
@@ -214,6 +214,10 @@ sub _copy {
 	}
 	$conf->{'x-amz-metadata-directive'} = 'REPLACE';
 	$conf->{'x-amz-copy-source'} = join '/','',$self->bucket->name,$self->key;
+
+	if(defined $headers) {
+		$conf->{$_} = $headers->{$_} for keys %{ $headers };
+	}
 
 	$conf->{"x-amz-meta-\L$_"} = $self->user_metadata->{$_}
 		for keys %{ $self->user_metadata };
