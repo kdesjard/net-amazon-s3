@@ -248,14 +248,15 @@ sub put {
 sub _put {
 	my ( $self, $value, $size, $md5_hex ) = @_;
 
-	my $md5_base64 = encode_base64( pack( 'H*', $md5_hex ) );
-	chomp $md5_base64;
-
 	my $conf = {
-		'Content-MD5'    => $md5_base64,
 		'Content-Length' => $size,
 		'Content-Type'   => $self->content_type,
 	};
+	if(defined $md5_hex and $md5_hex) {
+		my $md5_base64 = encode_base64( pack( 'H*', $md5_hex ) );
+		chomp $md5_base64;
+		$conf->{'Content-MD5'} = $md5_base64;
+	}
 
 	if ( $self->expires ) {
 		$conf->{Expires}
