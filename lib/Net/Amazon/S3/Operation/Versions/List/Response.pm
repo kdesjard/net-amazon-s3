@@ -53,6 +53,9 @@ sub _parse_data {
 		version_id_marker => scalar $xpc->findvalue ("/s3:ListVersionsResult/s3:VersionIdMarker"),
 		max_keys          => scalar $xpc->findvalue ("/s3:ListVersionsResult/s3:MaxKeys"),
 		is_truncated      => scalar $xpc->findvalue ("/s3:ListVersionsResult/s3:IsTruncated") eq 'true',
+		versions          => [],
+		delete_markers    => [],
+		common_prefixes   => [],
 	};
 
 	for my $content ($xpc->findnodes ("/s3:ListVersionsResult/s3:Version")) {
