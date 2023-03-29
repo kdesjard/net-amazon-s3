@@ -10,6 +10,7 @@ with 'Net::Amazon::S3::Request::Role::Query::Param::Delimiter';
 with 'Net::Amazon::S3::Request::Role::Query::Param::Marker';
 with 'Net::Amazon::S3::Request::Role::Query::Param::Max_keys';
 with 'Net::Amazon::S3::Request::Role::Query::Param::Prefix';
+with 'Net::Amazon::S3::Request::Role::Query::Param::Version_id';
 with 'Net::Amazon::S3::Request::Role::HTTP::Method::GET';
 
 __PACKAGE__->meta->make_immutable;
