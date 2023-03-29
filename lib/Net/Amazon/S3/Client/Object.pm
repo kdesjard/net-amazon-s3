@@ -16,6 +16,7 @@ use Ref::Util ();
 
 use Net::Amazon::S3::Constraint::ACL::Canned;
 use Net::Amazon::S3::Constraint::Etag;
+use Net::Amazon::S3::Constraint::ObjectType;
 use Net::Amazon::S3::Client::Object::Range;
 
 with 'Net::Amazon::S3::Role::ACL';
@@ -29,9 +30,11 @@ has 'client' =>
 has 'bucket' =>
 	( is => 'ro', isa => 'Net::Amazon::S3::Client::Bucket', required => 1 );
 has 'key'  => ( is => 'ro', isa => 'Str',  required => 1 );
+has 'version_id'  => ( is => 'ro', isa => 'Str',  required => 0 );
 has 'etag' => ( is => 'ro', isa => 'Net::Amazon::S3::Constraint::Etag', required => 0 );
 has 'size' => ( is => 'ro', isa => 'Int',  required => 0 );
-has 'folder' => ( is => 'ro', isa => 'Bool',  required => 0, default => 0 );
+has 'object_type' => ( is => 'ro', isa => 'Net::Amazon::S3::Constraint::ObjectType',  required => 0);
+has 'is_latest' => ( is => 'ro', isa => 'Bool',  required => 0 );
 has 'last_modified' =>
 	( is => 'ro', isa => DateTime, coerce => 1, required => 0, default => sub { shift->last_modified_raw }, lazy => 1 );
 has 'last_modified_raw' =>
@@ -311,10 +314,11 @@ sub put_filename {
 }
 
 sub delete {
-	my $self = shift;
+	my ($self, %params) = @_;
 
 	my $response = $self->_perform_operation (
 		'Net::Amazon::S3::Operation::Object::Delete',
+		%params,
 	);
 
 	return $response->is_success;
