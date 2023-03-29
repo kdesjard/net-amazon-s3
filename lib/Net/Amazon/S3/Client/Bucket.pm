@@ -134,21 +134,94 @@ sub list {
 			my @objects;
 			foreach my $node ($response->contents) {
 				push @objects, $self->object_class->new (
-					client => $self->client,
-					bucket => $self,
-					key    => $node->{key},
-					etag   => $node->{etag},
-					size   => $node->{size},
+					client            => $self->client,
+					bucket            => $self,
+					object_type       => 'object',
+					key               => $node->{key},
+					etag              => $node->{etag},
+					size              => $node->{size},
+					storage_class     => lc $node->{storage_class},
 					last_modified_raw => $node->{last_modified},
 				);
 			}
 			if(defined $response->common_prefixes) {
 				foreach my $folder ($response->common_prefixes) {
 					push @objects, $self->object_class->new (
-						client => $self->client,
-						bucket => $self,
-						key    => $folder,
-						folder => 1,
+						client      => $self->client,
+						bucket      => $self,
+						object_type => 'folder',
+						key         => $folder,
+					);
+				}
+			}
+
+			return undef unless @objects;
+
+			$end = 1 unless $response->is_truncated;
+
+			$marker = $response->next_marker
+				|| $objects[-1]->key;
+
+			return \@objects;
+		}
+	);
+}
+
+sub list_versions {
+	my ( $self, $conf ) = @_;
+	$conf ||= {};
+	my $prefix = $conf->{prefix};
+	my $delimiter = $conf->{delimiter};
+
+	my $marker = undef;
+	my $end    = 0;
+
+	return Data::Stream::Bulk::Callback->new(
+		callback => sub {
+
+			return undef if $end;
+			my $response = $self->_perform_operation (
+				'Net::Amazon::S3::Operation::Versions::List',
+
+				marker    => $marker,
+				prefix    => $prefix,
+				delimiter => $delimiter,
+			);
+			return unless $response->is_success;
+
+			my @objects;
+			foreach my $node ($response->versions) {
+				push @objects, $self->object_class->new (
+					client            => $self->client,
+					bucket            => $self,
+					object_type       => 'version',
+					key               => $node->{key},
+					version_id        => $node->{version_id},
+					is_latest         => ($node->{is_latest} eq 'true') ? 1 : 0,
+					etag              => $node->{etag},
+					size              => $node->{size},
+					last_modified_raw => $node->{last_modified},
+					storage_class     => lc $node->{storage_class},
+				);
+			}
+			foreach my $node ($response->delete_markers) {
+				push @objects, $self->object_class->new (
+					client            => $self->client,
+					bucket            => $self,
+					object_type       => 'marker',
+					key               => $node->{key},
+					version_id        => $node->{version_id},
+					is_latest         => ($node->{is_latest} eq 'true') ? 1 : 0,
+					last_modified_raw => $node->{last_modified},
+				);
+			}
+			if(defined $response->common_prefixes) {
+				foreach my $folder ($response->common_prefixes) {
+					push @objects, $self->object_class->new (
+						client      => $self->client,
+						bucket      => $self,
+						object_type => 'folder',
+						key         => $folder,
 					);
 				}
 			}
