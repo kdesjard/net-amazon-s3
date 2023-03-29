@@ -6,7 +6,10 @@ use Moose::Util::TypeConstraints;
 
 extends 'Net::Amazon::S3::Request::Object';
 
+with 'Net::Amazon::S3::Request::Role::Query::Param::Version_id';
 with 'Net::Amazon::S3::Request::Role::HTTP::Method::DELETE';
+
+has 'version_id' => ( is => 'ro', isa => 'Str', required => 0 );
 
 __PACKAGE__->meta->make_immutable;
 
