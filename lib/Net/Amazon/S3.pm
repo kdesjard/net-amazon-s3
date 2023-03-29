@@ -41,6 +41,7 @@ use Net::Amazon::S3::Operation::Object::Upload::Part;
 use Net::Amazon::S3::Operation::Object::Upload::Parts;
 use Net::Amazon::S3::Operation::Objects::Delete;
 use Net::Amazon::S3::Operation::Objects::List;
+use Net::Amazon::S3::Operation::Versions::List;
 use Net::Amazon::S3::Signature::V2;
 use Net::Amazon::S3::Signature::V4;
 use Net::Amazon::S3::Utils;
